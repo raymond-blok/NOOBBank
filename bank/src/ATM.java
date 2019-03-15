@@ -11,14 +11,15 @@ public class ATM {
   private ATMScreen as;
   CardReader accountReader;
   DisplayText text;
-  ArrayList<ScreenButton> buttonList;
+  ArrayList<ScreenButton> keypadButtonList;
+  ArrayList<InputDevice> inputDevices;
 
   Keypad keypad;
   ATM(Bank bank) {
     this.bank = bank;
     this.as = new ATMScreen();
     Frame f = new Frame("My ATM");
-    this.buttonList = new ArrayList<ScreenButton>();
+    this.keypadButtonList = new ArrayList<ScreenButton>();
     f.setBounds(200, 200, 400, 300);
     f.setBackground(Color.BLUE);
     f.addWindowListener(new MyWindowAdapter(f));
@@ -30,27 +31,31 @@ public class ATM {
     text.giveOutput("Insert your card");
     this.accountReader = new CardReader("account");
     this.keypad = new Keypad("keypad");
-    this.buttonList = this.genButtons(20, 20, 3, 3, 40, 40, "0");
-
-
+    this.keypadButtonList = this.genButtons(20, 20, 3, 3, 40, 40, "0");
+    this.inputDevices = new ArrayList<InputDevice>();
+    for(int i = 0; i < this.keypadButtonList.size(); i++) {
+      this.inputDevices.add(this.keypadButtonList.get(i));
+    };
+    this.inputDevices.add(this.keypad);
     while(true) {
       this.doTransaction();
     }
   }
   public void doTransaction() {
     String account_text;
+    Client client;
     while(true) {
       do{
         account_text = this.accountReader.getInput();
       } while(account_text == null);
-      Client client = this.bank.get(account_text);
+      client = this.bank.get(account_text);
       if(client != null){
         break;
       }
       this.text.giveOutput("wacht een paar en begin opnieuw...");
     }
-    for(int i = 0; i < this.buttonList.size(); i++) {
-      this.as.add(this.buttonList.get(i));
+    for(int i = 0; i < this.keypadButtonList.size(); i++) {
+      this.as.add(this.keypadButtonList.get(i));
     }
     this.text.giveOutput("enter your PIN");
 
@@ -62,18 +67,36 @@ public class ATM {
     int counter = 0;
     String buttonText;
     String pinList = "";
+    String xText = "";
+    DisplayText pinText = new DisplayText("pinText", new Point(200, 250));
+    this.as.add(pinText);
     while(true) {
-      buttonText = this.buttonList.get(counter).getInput();
-      if(buttonText != null) {
-
-        pinList += buttonText;
+      while(true) {
+        buttonText = this.inputDevices.get(counter).getInput();
+        if(buttonText != null) {
+          if( buttonText.equals("\n")){
+            break;
+          }
+          pinList += buttonText;
+          xText += "X";
+          System.out.println(buttonText);
+          pinText.giveOutput(xText);
+        }
+        counter++;
+        if(counter > (this.inputDevices.size()-1)) {
+          counter = 0;
+        }
       }
-
-      counter++;
-      if(counter > 9) {
-        counter = 0;
+      if(client.checkPin(pinList)) {
+        break;
       }
+      xText = "";
+      pinList = "";
+      pinText.giveOutput(xText);
     }
+    this.as.clear();
+    this.as.add(this.text);
+    this.text.giveOutput("youre in!!!");
   }
   private ArrayList<ScreenButton> genButtons(int startX, int startY ,int gridX, int gridY, int gapX, int gapY, String lastButton) {
     ArrayList<ScreenButton> temp = new ArrayList<ScreenButton>();
