@@ -14,6 +14,7 @@ public class ATM {
   private String yes;
   CardReader accountReader;
   DisplayText mainText;
+  DisplayText mainText2;
   DisplayText pinText;
   ArrayList<ScreenButton> keypadButtonList;
   ArrayList<ScreenButton> amountButtonList;
@@ -34,15 +35,16 @@ public class ATM {
     f.setVisible(true);
     // text
     this.yes = "yes";
-    this.mainText = new DisplayText("mainText", new Point(200, 200));
+    this.mainText = new DisplayText("mainText", new Point(10, 10));
+    this.mainText2 = new DisplayText("mainText", new Point(10, 40));
 
-    this.pinText = new DisplayText("pinText", new Point(200, 250));
+    this.pinText = new DisplayText("pinText", new Point(200, 50));
     this.accountReader = new CardReader("account");
     this.keypad = new Keypad("keypad");
     this.receiptPrinter = new ReceiptPrinter("receiptPrinter");
-    this.keypadButtonList = this.genButtons(20, 20, 3, 3, 40, 40, "0");
-    this.amountButtonList = this.genButtons(40, 40, 1, 4, 100, 100, null, new String[]{"\u20AC 10", "\u20AC 20", "\u20AC 50", "\u20AC 100"});
-    this.confirmButtonList = this.genButtons(40, 250, 1, 2, 200, 200, null, new String[]{this.yes,"no"});
+    this.keypadButtonList = this.genButtons(40, 60, 3, 3, 40, 40, "0");
+    this.amountButtonList = this.genButtons(40, 60, 1, 4, 80, 80, null, new String[]{"\u20AC 10", "\u20AC 20", "\u20AC 50", "\u20AC 100"});
+    this.confirmButtonList = this.genButtons(40, 150, 1, 2, 200, 200, null, new String[]{this.yes,"no"});
     while(true) {
       this.doTransaction();
     }
@@ -69,7 +71,6 @@ public class ATM {
         this.mainText.giveOutput("no card found, please try again.");
       }
     } while(client == null);
-
     return client;
   }
 
@@ -121,7 +122,7 @@ public class ATM {
     ArrayList<InputDevice> inputDevices = new ArrayList<InputDevice>();
     balance = client.getBalance(pinCode);
     this.as.clear();
-    this.mainText.giveOutput("Choose amount");
+    this.mainText.giveOutput("Choose amount " + balance);
     this.as.add(this.mainText);
     for(int i = 0; i < this.amountButtonList.size(); i++) {
       amountButton = this.amountButtonList.get(i);
@@ -129,7 +130,7 @@ public class ATM {
       this.as.add(amountButton);
     }
     while(true){
-      this.mainText.giveOutput("Choose amount");
+      this.mainText.giveOutput("Choose amount \u20AC" + balance);
       amountText = this.listenForInput(inputDevices);
       String[] splitString = amountText.split(" ");
       amount = Integer.parseInt(splitString[1]);
@@ -148,6 +149,17 @@ public class ATM {
     }
     if(this.askForReceipt()) {
       this.printReceipt(balance, amount);
+    }
+
+    this.as.clear();
+    this.mainText.giveOutput("withdrawing \u20AC " + amount );
+    this.mainText2.giveOutput(" please wait...");
+    this.as.add(this.mainText);
+    this.as.add(this.mainText2);
+    try{
+      TimeUnit.SECONDS.sleep(2);
+    }catch(InterruptedException e) {
+      System.err.println("oops");
     }
     return amount;
   }
