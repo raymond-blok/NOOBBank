@@ -122,7 +122,6 @@ public class ATM {
     ArrayList<InputDevice> inputDevices = new ArrayList<InputDevice>();
     balance = client.getBalance(pinCode);
     this.as.clear();
-    this.mainText.giveOutput("Choose amount " + balance);
     this.as.add(this.mainText);
     for(int i = 0; i < this.amountButtonList.size(); i++) {
       amountButton = this.amountButtonList.get(i);
