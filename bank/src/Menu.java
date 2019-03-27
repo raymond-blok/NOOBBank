@@ -42,7 +42,6 @@ public class Menu {
   public void open(ATMScreen screen, Menu prev) {
     this.prev = prev;
     this.open(screen);
-    System.out.println(prev.getName());
   }
 
   public void addInputDevice(InputDevice device) {

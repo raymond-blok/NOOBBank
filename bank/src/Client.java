@@ -2,18 +2,25 @@ public class Client {
   private String name;
   private String pin;
   private int balance;
+  private int trys;
 
   Client(String name, String pin, int balance) {
     this.name = name;
     this.pin = pin;
     this.balance = balance;
+    this.trys = 3;
   }
   public String getName() {
     return this.name;
   }
   public boolean checkPin(String pin) {
     //returns true if they are the same.
-    return this.pin.equals(pin);
+    if (this.pin.equals(pin) && this.trys > 0) {
+      this.trys = 3;
+      return true;
+    }
+    this.trys--;
+    return false;
   }
   public int getBalance(String pin) {
       if (this.checkPin(pin)) {
@@ -27,6 +34,14 @@ public class Client {
     if(balance > 0) {
       this.balance = this.balance + balance;
     }
+  }
+
+  public boolean isBlocked() {
+    return !(this.trys > 0);
+  }
+
+  public int getTrys() {
+    return this.trys;
   }
 
   public boolean withdraw(int balance, String pin) {
